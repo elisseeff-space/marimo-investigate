@@ -29,7 +29,7 @@ app._unparsable_cell(
         auth = APIKeyAuth(econfig["yandexgpt_key"]),
     )
     """,
-    name="_"
+    name="_",
 )
 
 
@@ -40,7 +40,13 @@ def _(docspath, pathlib, sdk):
     # Загрузим файлы с примерами
     # Файлы будут храниться 5 дней
     for path in paths:
-        file_1 = sdk.files.upload(path, ttl_days=5, name=str(path), expiration_policy='static', labels={'author': 'Jury Moroz'})
+        file_1 = sdk.files.upload(
+            path,
+            ttl_days=5,
+            name=str(path),
+            expiration_policy="static",
+            labels={"author": "Jury Moroz"},
+        )
         files.append(file_1)
     return file_1, files
 
@@ -53,7 +59,7 @@ def _(files):
 
 @app.cell
 def _(file_1, sdk):
-    sdk.files.info('fvttnss5nkj4u42luqkm')
+    sdk.files.info("fvttnss5nkj4u42luqkm")
     second = sdk.files.get(file_1.id)
     return
 
@@ -62,7 +68,7 @@ def _(file_1, sdk):
 def _(sdk):
     count = 0
     for _ in sdk.files.list():
-        count = count + 1  #_.delete()
+        count = count + 1  # _.delete()
     return (count,)
 
 
@@ -102,7 +108,14 @@ def _(second_1):
 def _(StaticIndexChunkingStrategy, TextSearchIndexType, files_1, sdk):
     # Создадим индекс для полнотекстового поиска по загруженным файлам
     # Максимальный размер фрагмента — 700 токенов с перекрытием 300 токенов
-    operation = sdk.search_indexes.create_deferred(files_1, index_type=TextSearchIndexType(chunking_strategy=StaticIndexChunkingStrategy(max_chunk_size_tokens=700, chunk_overlap_tokens=300)))
+    operation = sdk.search_indexes.create_deferred(
+        files_1,
+        index_type=TextSearchIndexType(
+            chunking_strategy=StaticIndexChunkingStrategy(
+                max_chunk_size_tokens=700, chunk_overlap_tokens=300
+            )
+        ),
+    )
     return (operation,)
 
 
@@ -137,21 +150,25 @@ def _(sdk):
 
 @app.cell
 def _(sdk):
-    input_text = ''
-    assistant_1 = sdk.assistants.get('fvtgkjka1pctrn72jh5g')
+    input_text = ""
+    assistant_1 = sdk.assistants.get("fvtgkjka1pctrn72jh5g")
     # Активируем ранее созданного ассистента
-    thread_1 = sdk.threads.get('fvtil41e0rvek6t4sqpv')
-    while input_text != 'exit':
-        print('Введите ваш вопрос ассистенту:')
+    thread_1 = sdk.threads.get("fvtil41e0rvek6t4sqpv")
+    while input_text != "exit":
+        print("Введите ваш вопрос ассистенту:")
         input_text = input()
-        if input_text != 'exit':
+        if input_text != "exit":
             thread_1.write(input_text)
             run = assistant_1.run(thread_1)
             result = run.wait()
-            print(f'Answer: {result.text}')
-            print(f'Результат 1: {result.message.author.role}')  # Отдаем модели все содержимое треда
+            print(f"Answer: {result.text}")
+            print(
+                f"Результат 1: {result.message.author.role}"
+            )  # Отдаем модели все содержимое треда
             for _ in result.message.citations:
-                print(f'Citation: {_.sources}')  # Чтобы получить результат, нужно дождаться окончания запуска  # Выводим на экран ответ  #print(f"Результат 2: {result.message.thread_id}")
+                print(
+                    f"Citation: {_.sources}"
+                )  # Чтобы получить результат, нужно дождаться окончания запуска  # Выводим на экран ответ  #print(f"Результат 2: {result.message.thread_id}")
     return assistant_1, thread_1
 
 
