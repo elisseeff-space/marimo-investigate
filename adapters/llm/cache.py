@@ -11,7 +11,7 @@ from datetime import UTC, datetime
 from functools import lru_cache
 from typing import Any
 
-from deriva.common.cache_utils import BaseDiskCache, dict_to_hashable, hash_inputs
+from common.cache_utils import BaseDiskCache, dict_to_hashable, hash_inputs
 
 
 # Cache schema hashes to avoid repeated JSON serialization (improves performance)

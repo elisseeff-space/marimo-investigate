@@ -42,7 +42,7 @@ from pydantic import BaseModel
 from pydantic_ai import Agent
 from pydantic_ai.settings import ModelSettings
 
-from deriva.common.exceptions import CircuitOpenError
+from common.exceptions import CircuitOpenError
 
 from .cache import CacheManager
 from .model_registry import VALID_PROVIDERS, get_pydantic_ai_model

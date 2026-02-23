@@ -12,14 +12,14 @@ from typing import Any, Literal
 from pydantic import BaseModel
 
 # Re-export exceptions for backwards compatibility
-from deriva.common.exceptions import APIError as APIError
-from deriva.common.exceptions import CacheError as CacheError
-from deriva.common.exceptions import CircuitOpenError as CircuitOpenError
-from deriva.common.exceptions import ConfigurationError as ConfigurationError
-from deriva.common.exceptions import LLMError as LLMError
-from deriva.common.exceptions import RateLimitError as RateLimitError
-from deriva.common.exceptions import TransientError as TransientError
-from deriva.common.exceptions import ValidationError as ValidationError
+from common.exceptions import APIError as APIError
+from common.exceptions import CacheError as CacheError
+from common.exceptions import CircuitOpenError as CircuitOpenError
+from common.exceptions import ConfigurationError as ConfigurationError
+from common.exceptions import LLMError as LLMError
+from common.exceptions import RateLimitError as RateLimitError
+from common.exceptions import TransientError as TransientError
+from common.exceptions import ValidationError as ValidationError
 
 from .model_registry import VALID_PROVIDERS
 

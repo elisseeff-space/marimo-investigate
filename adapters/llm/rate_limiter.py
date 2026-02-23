@@ -19,7 +19,7 @@ from collections import deque
 from dataclasses import dataclass, field
 from enum import Enum
 
-from deriva.common.exceptions import CircuitOpenError
+from common.exceptions import CircuitOpenError
 
 logger = logging.getLogger(__name__)
 

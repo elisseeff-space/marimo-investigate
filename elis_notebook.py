@@ -6,6 +6,16 @@ app = marimo.App(width="medium")
 
 @app.cell
 def _():
+    from adapters.llm import LLMManager
+
+    # Uses provider from .env (LLM_PROVIDER, LLM_MODEL, etc.)
+    llm = LLMManager()
+
+    # Simple query
+    response = llm.query("What is Python?")
+    if response.response_type == "live":
+        print(response.content)
+
     return
 
 
@@ -61,11 +71,11 @@ def _(mo):
 
 
     class MovieApp:  # Example class to demonstrate graph traversal concepts often used in Cypher tutorials
-    
+
         def __init__(self, uri):
             self.driver = None
-        
-    
+
+
     mo.md("""
     To use **Neo4j** (a popular open-source NoSQL database) locally:
     1. Install Neo4j Desktop or Docker.
@@ -85,14 +95,13 @@ def _(e):
 
     try:
         from neo4j import GraphDatabase
-    
+
         # Replace with your actual password and URI if different defaults are used in Docker/Neo4j Desktop settings.
         username = "neo4j"
         uri = "http://localhost:17478"  # Neo4j Browser URL (HTTP) or bolt endpoint
         driver = None
 
     except Exception: e
-
     return (mo,)
 
 
@@ -103,11 +112,11 @@ app._unparsable_cell(
     def run_cypher_query(uri):
         \"\"\"
         Function demonstrating how to connect securely using credentials.
-    
+
         In practice, never hardcode passwords. Use environment variables 
         with a .env file in your project directory for secrets management:
             export NEO4J_URI=\"bolt://localhost:7687\"
-        
+
     $$ \\text{Credentials} = f(\\{\\}) $$
     \"\"\"
     from neo4j import GraphDatabase
@@ -120,7 +129,7 @@ app._unparsable_cell(
 
     try:
         username_val = os.getenv(username_env_var_name, \"\")
-    
+
     except Exception as e:
 
     mo.md(\"\"\"
@@ -143,7 +152,7 @@ app._unparsable_cell(
 
     try:
         from neo4j import GraphDatabase
-    
+
     except ImportError:
 
     mo.md(\"\"\"

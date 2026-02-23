@@ -38,6 +38,9 @@ def get_pydantic_ai_model(config: dict[str, Any]) -> "Model | str":
     if provider == "openai":
         return f"openai:{model}"
 
+    elif provider == "openrouter":
+        return f"openrouter:{model}"
+
     elif provider == "anthropic":
         return f"anthropic:{model}"
 
