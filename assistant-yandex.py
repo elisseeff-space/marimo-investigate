@@ -4,15 +4,15 @@ __generated_with = "0.20.2"
 app = marimo.App()
 
 
-@app.cell
-def _():
+app._unparsable_cell(
+    r"""
     import pathlib
     #import pickle
 
     import time, json
-    from yandex_cloud_ml_sdk import YCloudML
-    from yandex_cloud_ml_sdk.auth import APIKeyAuth
-    from yandex_cloud_ml_sdk.search_indexes import (
+    from yandex-ai-studio-sdk import YCloudML
+    from yandex-ai-studio-sdk.auth import APIKeyAuth
+    from yandex-ai-studio-sdk.search_indexes import (
         StaticIndexChunkingStrategy,
         TextSearchIndexType,
     )
@@ -28,13 +28,9 @@ def _():
         folder_id = econfig["x-folder-id"],
         auth = APIKeyAuth(econfig["yandexgpt_key"]),
     )
-    return (
-        StaticIndexChunkingStrategy,
-        TextSearchIndexType,
-        docspath,
-        pathlib,
-        sdk,
-    )
+    """,
+    name="_"
+)
 
 
 @app.cell
@@ -173,4 +169,3 @@ def _(thread_1):
 
 if __name__ == "__main__":
     app.run()
-
