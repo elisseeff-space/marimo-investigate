@@ -18,11 +18,15 @@ from pathlib import Path
 
 from adapters.llm import LLMManager
 from adapters.llm.schemas import GovernmentDocumentExtraction
+from common.document_reader import read_document
 
 
 def read_file_content(file_path: str) -> str:
     """
     Read content from a file.
+
+    For PDF and DOCX files, uses proper document extraction.
+    For text files, reads as plain text.
 
     Args:
         file_path: Path to the file to read
@@ -37,6 +41,14 @@ def read_file_content(file_path: str) -> str:
     path = Path(file_path)
     if not path.exists():
         raise FileNotFoundError(f"File not found: {file_path}")
+
+    # Use document reader for PDF and DOCX files
+    suffix = path.suffix.lower()
+    if suffix in (".pdf", ".docx"):
+        content = read_document(path)
+        if content is not None:
+            return content
+        # Fall through to plain text read if document reader fails
 
     # Try to read as text
     try:
