@@ -6,7 +6,10 @@ Maps Deriva environment config to PydanticAI model identifiers.
 
 from __future__ import annotations
 
+import os
 from typing import TYPE_CHECKING, Any
+
+import httpx
 
 if TYPE_CHECKING:
     from pydantic_ai.models import Model
@@ -44,7 +47,26 @@ def get_pydantic_ai_model(config: dict[str, Any]) -> "Model | str":
         from pydantic_ai.providers.openai import OpenAIProvider
 
         base_url = "https://openrouter.ai/api/v1"
-        openai_provider = OpenAIProvider(base_url=base_url, api_key=api_key)
+        
+        # Build extra headers from environment variables
+        extra_headers = {}
+        site_url = os.getenv("OPENROUTER_SITE_URL")
+        site_name = os.getenv("OPENROUTER_SITE_NAME")
+        if site_url:
+            extra_headers["HTTP-Referer"] = site_url
+        if site_name:
+            extra_headers["X-Title"] = site_name
+        
+        # Create httpx client with extra headers if any are set
+        http_client = None
+        if extra_headers:
+            http_client = httpx.AsyncClient(headers=extra_headers)
+        
+        openai_provider = OpenAIProvider(
+            base_url=base_url,
+            api_key=api_key,
+            http_client=http_client,
+        )
         return OpenAIChatModel(model, provider=openai_provider)
 
     elif provider == "openai-compatible":
