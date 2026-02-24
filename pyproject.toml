@@ -5,12 +5,16 @@ description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
+    "backoff>=2.2.1",
+    "diskcache>=5.6.3",
     "marimo>=0.20.2",
     "mcp>=1.26.0",
     "neo4j>=6.1.0",
     "pandas>=3.0.1",
     "pydantic-ai[examples]>=1.62.0",
+    "python-dotenv>=1.2.1",
     "requests>=2.32.5",
     "ruff>=0.15.2",
+    "structlog>=25.4.0",
     "yandex-cloud-ml-sdk>=0.19.1",
 ]

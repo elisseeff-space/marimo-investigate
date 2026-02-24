@@ -1,0 +1,444 @@
+{
+  "type": "object",
+  "description": "Extracted national development goals, projects, and indicators from Russian government documents",
+  "properties": {
+    "document_info": {
+      "type": "object",
+      "description": "Metadata about the source document",
+      "properties": {
+        "title": {
+          "type": "string",
+          "description": "Full title of the document"
+        },
+        "document_type": {
+          "type": "string",
+          "enum": [
+            "Указ",
+            "Постановление",
+            "Паспорт НП",
+            "Единый план",
+            "Стратегия",
+            "Госпрограмма",
+            "Другое"
+          ],
+          "description": "Type of the document"
+        },
+        "date": {
+          "type": "string",
+          "description": "Document date (YYYY-MM-DD format)"
+        },
+        "number": {
+          "type": "string",
+          "description": "Document number (e.g., '309', '1710')"
+        },
+        "source_file": {
+          "type": "string",
+          "description": "Original filename"
+        }
+      },
+      "required": [
+        "title",
+        "document_type",
+        "source_file"
+      ]
+    },
+    "national_goals": {
+      "type": "array",
+      "description": "National Development Goals (НЦР) defined in the document",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Unique identifier (e.g., 'НЦР-1', 'НЦР-а')"
+          },
+          "name": {
+            "type": "string",
+            "description": "Full name of the national goal"
+          },
+          "description": {
+            "type": "string",
+            "description": "Detailed description of the goal"
+          },
+          "curator": {
+            "type": "string",
+            "description": "Curator of the goal (government official)"
+          },
+          "indicators": {
+            "type": "array",
+            "description": "Indicators/metrics for measuring goal achievement",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "description": "Indicator identifier (e.g., 'НЦР-1.1')"
+                },
+                "name": {
+                  "type": "string",
+                  "description": "Indicator name/description"
+                },
+                "unit": {
+                  "type": "string",
+                  "description": "Unit of measurement (e.g., 'процент', 'млн человек', 'кв. метров')"
+                },
+                "baseline_year": {
+                  "type": "integer",
+                  "description": "Baseline year for measurement"
+                },
+                "baseline_value": {
+                  "type": "number",
+                  "description": "Value at baseline year"
+                },
+                "target_values": {
+                  "type": "object",
+                  "description": "Target values by year",
+                  "properties": {
+                    "2024": {
+                      "type": "number"
+                    },
+                    "2025": {
+                      "type": "number"
+                    },
+                    "2026": {
+                      "type": "number"
+                    },
+                    "2027": {
+                      "type": "number"
+                    },
+                    "2028": {
+                      "type": "number"
+                    },
+                    "2029": {
+                      "type": "number"
+                    },
+                    "2030": {
+                      "type": "number"
+                    },
+                    "2036": {
+                      "type": "number"
+                    }
+                  },
+                  "additionalProperties": false
+                },
+                "data_source": {
+                  "type": "string",
+                  "description": "Information system or source for data"
+                }
+              },
+              "required": [
+                "id",
+                "name"
+              ]
+            }
+          },
+          "factors_and_tools": {
+            "type": "array",
+            "description": "Key factors and tools for achieving the goal",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "id",
+          "name"
+        ]
+      }
+    },
+    "national_projects": {
+      "type": "array",
+      "description": "National Projects (НП) aimed at achieving national goals",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Unique identifier (e.g., 'НП-1')"
+          },
+          "name": {
+            "type": "string",
+            "description": "Full name of the national project"
+          },
+          "short_name": {
+            "type": "string",
+            "description": "Short name for diagrams"
+          },
+          "description": {
+            "type": "string",
+            "description": "Description of the national project"
+          },
+          "implementation_period": {
+            "type": "object",
+            "properties": {
+              "start_date": {
+                "type": "string",
+                "description": "Start date (YYYY-MM-DD)"
+              },
+              "end_date": {
+                "type": "string",
+                "description": "End date (YYYY-MM-DD)"
+              }
+            }
+          },
+          "curator": {
+            "type": "string",
+            "description": "Project curator (Deputy Prime Minister)"
+          },
+          "head": {
+            "type": "string",
+            "description": "Project head (Minister)"
+          },
+          "administrator": {
+            "type": "string",
+            "description": "Project administrator"
+          },
+          "target_groups": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Target groups of the project"
+          },
+          "related_national_goals": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "IDs of related national goals"
+          },
+          "indicators": {
+            "type": "array",
+            "description": "Project indicators with year-by-year values",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "description": "Indicator ID (e.g., 'НП-1.1')"
+                },
+                "name": {
+                  "type": "string",
+                  "description": "Indicator name"
+                },
+                "unit": {
+                  "type": "string",
+                  "description": "Unit of measurement"
+                },
+                "baseline_value": {
+                  "type": "number",
+                  "description": "Baseline value"
+                },
+                "baseline_year": {
+                  "type": "integer",
+                  "description": "Baseline year"
+                },
+                "target_values": {
+                  "type": "object",
+                  "description": "Target values by year",
+                  "properties": {
+                    "2024": {
+                      "type": "number"
+                    },
+                    "2025": {
+                      "type": "number"
+                    },
+                    "2026": {
+                      "type": "number"
+                    },
+                    "2027": {
+                      "type": "number"
+                    },
+                    "2028": {
+                      "type": "number"
+                    },
+                    "2029": {
+                      "type": "number"
+                    },
+                    "2030": {
+                      "type": "number"
+                    },
+                    "2036": {
+                      "type": "number"
+                    }
+                  },
+                  "additionalProperties": false
+                },
+                "data_source": {
+                  "type": "string",
+                  "description": "Information system (source)"
+                },
+                "is_quasi_indicator": {
+                  "type": "boolean",
+                  "description": "True if this is a quasi-indicator (event with numeric target)"
+                }
+              },
+              "required": [
+                "id",
+                "name"
+              ]
+            }
+          },
+          "federal_projects": {
+            "type": "array",
+            "description": "Federal projects within this national project",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "description": "Federal project ID (e.g., 'ФП-1')"
+                },
+                "name": {
+                  "type": "string",
+                  "description": "Federal project name"
+                },
+                "description": {
+                  "type": "string",
+                  "description": "Federal project description"
+                },
+                "goal": {
+                  "type": "string",
+                  "description": "Federal project goal"
+                },
+                "indicators": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string"
+                      },
+                      "name": {
+                        "type": "string"
+                      },
+                      "unit": {
+                        "type": "string"
+                      },
+                      "target_values": {
+                        "type": "object",
+                        "properties": {
+                          "2024": {
+                            "type": "number"
+                          },
+                          "2025": {
+                            "type": "number"
+                          },
+                          "2026": {
+                            "type": "number"
+                          },
+                          "2027": {
+                            "type": "number"
+                          },
+                          "2028": {
+                            "type": "number"
+                          },
+                          "2029": {
+                            "type": "number"
+                          },
+                          "2030": {
+                            "type": "number"
+                          },
+                          "2036": {
+                            "type": "number"
+                          }
+                        },
+                        "additionalProperties": false
+                      }
+                    },
+                    "required": [
+                      "id",
+                      "name"
+                    ]
+                  }
+                }
+              },
+              "required": [
+                "id",
+                "name"
+              ]
+            }
+          }
+        },
+        "required": [
+          "id",
+          "name"
+        ]
+      }
+    },
+    "state_programs": {
+      "type": "array",
+      "description": "State Programs (ГП) mentioned in the document",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "State program ID"
+          },
+          "name": {
+            "type": "string",
+            "description": "State program name"
+          },
+          "description": {
+            "type": "string",
+            "description": "State program description"
+          },
+          "related_national_projects": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Related national project IDs"
+          }
+        },
+        "required": [
+          "name"
+        ]
+      }
+    },
+    "relationships": {
+      "type": "array",
+      "description": "Relationships between extracted elements for ArchiMate graph",
+      "items": {
+        "type": "object",
+        "properties": {
+          "source_id": {
+            "type": "string",
+            "description": "Source element ID"
+          },
+          "target_id": {
+            "type": "string",
+            "description": "Target element ID"
+          },
+          "relationship_type": {
+            "type": "string",
+            "enum": [
+              "Aggregation",
+              "Composition",
+              "Association",
+              "Realization",
+              "Influence",
+              "Serving"
+            ],
+            "description": "ArchiMate relationship type"
+          },
+          "name": {
+            "type": "string",
+            "description": "Relationship name/description"
+          }
+        },
+        "required": [
+          "source_id",
+          "target_id",
+          "relationship_type"
+        ]
+      }
+    }
+  },
+  "required": [
+    "document_info",
+    "national_goals",
+    "national_projects"
+  ]
+}

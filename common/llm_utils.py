@@ -1,6 +1,11 @@
 """LLM response utilities for Deriva.
 
 Provides consistent handling of LLM response objects across the pipeline.
+
+Works with LLMResponse objects from adapters.llm that have:
+- content: The response text
+- usage: Dict with prompt_tokens and completion_tokens
+- response_type: ResponseType enum indicating if cached
 """
 
 from __future__ import annotations
@@ -37,13 +42,13 @@ def extract_llm_details(response: Any) -> LLMDetails:
     """
     Extract LLM details from a response object.
 
-    Works with LLMResponse objects from deriva.adapters.llm that have:
+    Works with LLMResponse objects from adapters.llm that have:
     - content: The response text
     - usage: Dict with prompt_tokens and completion_tokens
     - response_type: ResponseType enum indicating if cached
 
     Args:
-        response: LLM response object (typically LLMResponse from deriva.adapters.llm)
+        response: LLM response object (typically LLMResponse from adapters.llm)
 
     Returns:
         Dictionary with extracted details:

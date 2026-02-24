@@ -3,29 +3,27 @@ LLM Manager - A multi-provider LLM abstraction with caching and structured outpu
 
 Uses PydanticAI for model-agnostic LLM interactions.
 
-Supports:
+Supported Providers:
 - Azure OpenAI
 - OpenAI
 - Anthropic
 - Ollama
 - Mistral
 - LM Studio
+- OpenRouter
 
 Example:
-    from deriva.adapters.llm import LLMManager
-    from pydantic import BaseModel
+    from adapters.llm import LLMManager
+    from adapters.llm.schemas import GovernmentDocumentExtraction
 
     # Basic usage
     llm = LLMManager()
     response = llm.query("What is Python?")
 
-    # Structured output
-    class Concept(BaseModel):
-        name: str
-        description: str
-
-    result = llm.query("Extract concept from...", response_model=Concept)
-    print(result.name)  # Type-safe!
+    # Structured output with default schema
+    llm = LLMManager(default_response_model=GovernmentDocumentExtraction)
+    result = llm.query("Extract goals from document...")
+    print(result.national_goals)  # Type-safe!
 """
 
 from __future__ import annotations

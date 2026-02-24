@@ -12,7 +12,7 @@ Supported Providers:
     - LM Studio
 
 Usage:
-    from deriva.adapters.llm import LLMManager
+    from adapters.llm import LLMManager
 
     # Basic query
     llm = LLMManager()
@@ -58,6 +58,7 @@ from .models import (
 from .rate_limiter import RateLimitConfig, RateLimiter, get_default_rate_limit
 from .retry import classify_exception
 from .schemas import EXTRACTION_SCHEMAS
+from .schemas.government_docs import GovernmentDocumentExtraction
 
 logger = logging.getLogger(__name__)
 
@@ -203,23 +204,26 @@ class LLMManager:
         llm = LLMManager()
         response = llm.query("What is Python?")
 
-        # Structured output
-        class Concept(BaseModel):
-            name: str
-            description: str
-
-        result = llm.query("Extract concept from...", response_model=Concept)
-        print(result.name)  # Type-safe access
+        # Structured output with default schema
+        from adapters.llm.schemas import GovernmentDocumentExtraction
+        llm = LLMManager(default_response_model=GovernmentDocumentExtraction)
+        result = llm.query("Extract goals from document...")
+        print(result.national_goals)  # Type-safe access
     """
 
-    def __init__(self):
+    def __init__(self, default_response_model: type[BaseModel] | None = None):
         """
         Initialize LLM Manager from .env configuration.
+
+        Args:
+            default_response_model: Default Pydantic model for structured output.
+                If set, all query() calls will use this model unless overridden.
+                Can also be set via LLM_DEFAULT_RESPONSE_MODEL env var.
 
         Raises:
             ConfigurationError: If configuration is invalid
         """
-        load_dotenv(override=True)
+        load_dotenv(override=False)  # Don't override existing env vars
 
         self.config = self._load_config_from_env()
         self._validate_config()
@@ -263,6 +267,35 @@ class LLMManager:
         self.nocache = self.config.get("nocache", False)
         self.temperature = self.config.get("temperature", 0.7)
         self.max_tokens = self.config.get("max_tokens")
+        
+        # Set default response model (parameter takes precedence over env var)
+        self._default_response_model = default_response_model
+        if self._default_response_model is None:
+            # Try to load from environment variable
+            default_model_name = os.getenv("LLM_DEFAULT_RESPONSE_MODEL")
+            if default_model_name:
+                self._default_response_model = self._resolve_model_name(default_model_name)
+
+    def _resolve_model_name(self, model_name: str) -> type[BaseModel] | None:
+        """
+        Resolve a model name string to a Pydantic model class.
+        
+        Args:
+            model_name: Name of the model (e.g., "GovernmentDocumentExtraction")
+            
+        Returns:
+            Pydantic model class or None if not found
+        """
+        # Check extraction schemas first
+        if model_name in EXTRACTION_SCHEMAS:
+            return EXTRACTION_SCHEMAS[model_name]
+        
+        # Try government_docs module
+        model_map = {
+            "GovernmentDocumentExtraction": GovernmentDocumentExtraction,
+        }
+        
+        return model_map.get(model_name)
 
     @classmethod
     def from_config(
@@ -273,6 +306,7 @@ class LLMManager:
         timeout: int = 60,
         temperature: float | None = None,
         nocache: bool = True,
+        default_response_model: type[BaseModel] | None = None,
     ) -> "LLMManager":
         """
         Create an LLMManager from explicit configuration.
@@ -288,7 +322,7 @@ class LLMManager:
         Returns:
             Configured LLMManager instance
         """
-        load_dotenv(override=True)
+        load_dotenv(override=False)  # Don't override existing env vars
 
         effective_temperature = (
             temperature
@@ -352,6 +386,9 @@ class LLMManager:
         instance.nocache = nocache
         instance.temperature = effective_temperature
         instance.max_tokens = None
+        
+        # Set default response model
+        instance._default_response_model = default_response_model
 
         return instance
 
@@ -361,7 +398,20 @@ class LLMManager:
         return self.config.get("provider", "unknown")
 
     def _load_config_from_env(self) -> dict[str, Any]:
-        """Load configuration from environment variables."""
+        """
+        Load configuration from environment variables.
+        
+        Supports two configuration modes:
+        
+        1. Simple mode (LLM_DEFAULT_PROVIDER + LLM_MODEL):
+           - LLM_DEFAULT_PROVIDER: Provider name (azure, openai, lmstudio, ollama, etc.)
+           - LLM_MODEL: Model name (any model available from the provider)
+           - Provider-specific env vars for API keys and URLs
+           
+        2. Benchmark mode (LLM_DEFAULT_MODEL):
+           - Uses predefined model configurations (LLM_{NAME}_PROVIDER, etc.)
+        """
+        # Check for benchmark mode first
         default_model = os.getenv("LLM_DEFAULT_MODEL")
         if default_model:
             benchmark_models = load_benchmark_models()
@@ -372,44 +422,51 @@ class LLMManager:
                 raise ConfigurationError(
                     f"LLM_DEFAULT_MODEL '{default_model}' not found. Available: {available}"
                 )
-            config = benchmark_models[default_model]
-            provider = config.provider
-            api_url = config.get_api_url()
-            api_key = config.get_api_key()
-            model = config.model
+            model_config = benchmark_models[default_model]
+            provider = model_config.provider
+            api_url = model_config.get_api_url()
+            api_key = model_config.get_api_key()
+            model = model_config.name
         else:
-            provider = os.getenv("LLM_PROVIDER", "azure")
-
+            # Simple mode: LLM_DEFAULT_PROVIDER + LLM_MODEL
+            provider = os.getenv("LLM_DEFAULT_PROVIDER", os.getenv("LLM_PROVIDER", "azure"))
+            model = os.getenv("LLM_MODEL")
+            
+            if not model:
+                raise ConfigurationError(
+                    "LLM_MODEL environment variable is required when not using LLM_DEFAULT_MODEL"
+                )
+            
+            # Get provider-specific configuration
             if provider == "azure":
                 api_url = os.getenv("LLM_AZURE_API_URL")
                 api_key = os.getenv("LLM_AZURE_API_KEY")
-                model = os.getenv("LLM_AZURE_MODEL", "gpt-4o-mini")
             elif provider == "openai":
                 api_url = "https://api.openai.com/v1/chat/completions"
-                api_key = os.getenv("LLM_OPENAI_API_KEY")
-                model = os.getenv("LLM_OPENAI_MODEL", "gpt-4o-mini")
+                api_key = os.getenv("LLM_OPENAI_API_KEY") or os.getenv("OPENAI_API_KEY")
+            elif provider == "openrouter":
+                api_url = "https://openrouter.ai/api/v1"
+                api_key = os.getenv("LLM_OPENROUTER_API_KEY") or os.getenv("OPENROUTER_API_KEY")
             elif provider == "anthropic":
                 api_url = "https://api.anthropic.com/v1/messages"
-                api_key = os.getenv("LLM_ANTHROPIC_API_KEY")
-                model = os.getenv("LLM_ANTHROPIC_MODEL", "claude-sonnet-4-20250514")
+                api_key = os.getenv("LLM_ANTHROPIC_API_KEY") or os.getenv("ANTHROPIC_API_KEY")
             elif provider == "ollama":
-                api_url = os.getenv(
-                    "LLM_OLLAMA_API_URL", "http://localhost:11434/api/chat"
-                )
+                api_url = os.getenv("LLM_OLLAMA_API_URL", "http://localhost:11434")
                 api_key = None
-                model = os.getenv("LLM_OLLAMA_MODEL", "llama3.2")
             elif provider == "mistral":
                 api_url = "https://api.mistral.ai/v1/chat/completions"
-                api_key = os.getenv("LLM_MISTRAL_API_KEY")
-                model = os.getenv("LLM_MISTRAL_MODEL", "mistral-large-latest")
+                api_key = os.getenv("LLM_MISTRAL_API_KEY") or os.getenv("MISTRAL_API_KEY")
             elif provider == "lmstudio":
-                api_url = os.getenv(
-                    "LLM_LMSTUDIO_API_URL", "http://localhost:1234/v1/chat/completions"
-                )
+                api_url = os.getenv("LLM_LMSTUDIO_API_URL", "http://localhost:1234/v1")
                 api_key = None
-                model = os.getenv("LLM_LMSTUDIO_MODEL", "local-model")
+            elif provider == "openai-compatible":
+                api_url = os.getenv("LLM_COMPATIBLE_API_URL")
+                api_key = os.getenv("LLM_COMPATIBLE_API_KEY", "not-needed")
             else:
-                raise ConfigurationError(f"Unknown LLM provider: {provider}")
+                raise ConfigurationError(
+                    f"Unknown LLM provider: {provider}. "
+                    f"Valid providers: azure, openai, openrouter, anthropic, ollama, mistral, lmstudio, openai-compatible"
+                )
 
         max_tokens_str = os.getenv("LLM_MAX_TOKENS", "")
         max_tokens = int(max_tokens_str) if max_tokens_str else None
@@ -497,7 +554,7 @@ class LLMManager:
         use_cache: bool = True,
         system_prompt: str | None = None,
         bench_hash: str | None = None,
-    ) -> LLMResponse: ...
+    ) -> BaseModel | LLMResponse: ...
 
     def query(
         self,
@@ -516,7 +573,9 @@ class LLMManager:
 
         Args:
             prompt: The prompt text
-            response_model: Pydantic model for structured output (returns validated instance)
+            response_model: Pydantic model for structured output (returns validated instance).
+                If not provided, uses default_response_model set in __init__ or via
+                LLM_DEFAULT_RESPONSE_MODEL env var.
             schema: Optional raw JSON schema for structured output
             temperature: Sampling temperature (0-2), defaults to configured LLM_TEMPERATURE
             max_tokens: Maximum tokens in response
@@ -532,6 +591,10 @@ class LLMManager:
             temperature if temperature is not None else self.temperature
         )
         effective_max_tokens = max_tokens if max_tokens is not None else self.max_tokens
+        
+        # Use default response model if no explicit response_model provided
+        if response_model is None:
+            response_model = self._default_response_model  # type: ignore[assignment]
 
         # Generate cache key
         cache_key = CacheManager.generate_cache_key(

@@ -1,0 +1,111 @@
+{
+  "_export_info": {
+    "exported_at": "2026-02-23T20:52:29.474265",
+    "schema_version": "1.0",
+    "source_file": "test_docs/sample_doc.txt"
+  },
+  "document_info": {
+    "title": "О национальных целях развития Российской Федерации на период до 2030 года и на перспективу до 2036 года",
+    "document_type": "Указ",
+    "date": null,
+    "number": "309",
+    "source_file": "sample_doc.txt"
+  },
+  "national_goals": [
+    {
+      "id": "НЦР-1",
+      "name": "Сбережение народа России",
+      "description": null,
+      "curator": null,
+      "indicators": [],
+      "factors_and_tools": []
+    },
+    {
+      "id": "НЦР-2",
+      "name": "Возможности для самореализации и развития талантов",
+      "description": null,
+      "curator": null,
+      "indicators": [],
+      "factors_and_tools": []
+    },
+    {
+      "id": "НЦР-3",
+      "name": "Искусственный интеллект и цифровая трансформация",
+      "description": null,
+      "curator": null,
+      "indicators": [],
+      "factors_and_tools": []
+    }
+  ],
+  "national_projects": [
+    {
+      "id": "НП-1",
+      "name": "Здоровье",
+      "short_name": null,
+      "description": null,
+      "implementation_period": null,
+      "curator": null,
+      "head": null,
+      "administrator": null,
+      "target_groups": [],
+      "related_national_goals": [
+        "НЦР-1"
+      ],
+      "indicators": [],
+      "federal_projects": []
+    },
+    {
+      "id": "НП-2",
+      "name": "Образование",
+      "short_name": null,
+      "description": null,
+      "implementation_period": null,
+      "curator": null,
+      "head": null,
+      "administrator": null,
+      "target_groups": [],
+      "related_national_goals": [
+        "НЦР-2"
+      ],
+      "indicators": [],
+      "federal_projects": []
+    },
+    {
+      "id": "НП-3",
+      "name": "Цифровая экономика",
+      "short_name": null,
+      "description": null,
+      "implementation_period": null,
+      "curator": null,
+      "head": null,
+      "administrator": null,
+      "target_groups": [],
+      "related_national_goals": [
+        "НЦР-3"
+      ],
+      "indicators": [],
+      "federal_projects": []
+    }
+  ],
+  "state_programs": [],
+  "relationships": [
+    {
+      "source_id": "НП-1",
+      "target_id": "НЦР-1",
+      "relationship_type": "Realization",
+      "name": null
+    },
+    {
+      "source_id": "НП-2",
+      "target_id": "НЦР-2",
+      "relationship_type": "Realization",
+      "name": null
+    },
+    {
+      "source_id": "НП-3",
+      "target_id": "НЦР-3",
+      "relationship_type": "Realization",
+      "name": null
+    }
+  ]
+}

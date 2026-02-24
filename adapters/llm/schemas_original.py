@@ -5,7 +5,7 @@ These models are used with PydanticAI to enforce structured output from LLMs.
 They correspond to the extraction and derivation step outputs.
 
 Usage:
-    from deriva.adapters.llm.schemas import BusinessConceptResponse
+    from adapters.llm.schemas import BusinessConceptResponse
 
     llm = LLMManager()
     result = llm.query(prompt, response_model=BusinessConceptResponse)

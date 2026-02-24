@@ -23,7 +23,7 @@ from typing import Any
 
 import diskcache
 
-from deriva.common.exceptions import CacheError
+from common.exceptions import CacheError
 
 
 def hash_inputs(*args: Any, separator: str = "|") -> str:

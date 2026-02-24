@@ -15,7 +15,6 @@ def _():
     response = llm.query("What is Python?")
     if response.response_type == "live":
         print(response.content)
-
     return
 
 
