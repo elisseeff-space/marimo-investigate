@@ -17,5 +17,6 @@ dependencies = [
     "requests>=2.32.5",
     "ruff>=0.15.2",
     "structlog>=25.4.0",
+    "yandex-ai-studio-sdk>=0.19.2",
     "yandex-cloud-ml-sdk>=0.19.1",
 ]

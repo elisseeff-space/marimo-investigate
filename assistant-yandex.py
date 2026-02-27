@@ -4,33 +4,37 @@ __generated_with = "0.20.2"
 app = marimo.App()
 
 
-app._unparsable_cell(
-    r"""
+@app.cell
+def _():
     import pathlib
     #import pickle
 
     import time, json
-    from yandex-ai-studio-sdk import YCloudML
-    from yandex-ai-studio-sdk.auth import APIKeyAuth
-    from yandex-ai-studio-sdk.search_indexes import (
+    from yandex_ai_studio_sdk import AIStudio
+    from yandex_ai_studio_sdk.auth import APIKeyAuth
+    from yandex_ai_studio_sdk.search_indexes import (
         StaticIndexChunkingStrategy,
         TextSearchIndexType,
     )
 
     # <путь_к_файлам_с_примерами>
-    docspath = "./Documents/ya-assistant"
+    docspath = "./test_docs"
 
-    in_file = "./elis_yagpt.json"
+    in_file = "/home/pavel/export/cfg/elis_yagpt.json"
     file = open(in_file, 'r')
     econfig = json.load(file)
 
-    sdk = YCloudML(
+    sdk = AIStudio(
         folder_id = econfig["x-folder-id"],
         auth = APIKeyAuth(econfig["yandexgpt_key"]),
     )
-    """,
-    name="_",
-)
+    return (
+        StaticIndexChunkingStrategy,
+        TextSearchIndexType,
+        docspath,
+        pathlib,
+        sdk,
+    )
 
 
 @app.cell
@@ -59,7 +63,7 @@ def _(files):
 
 @app.cell
 def _(file_1, sdk):
-    sdk.files.info("fvttnss5nkj4u42luqkm")
+    sdk.files("fvteqps7lvg840odka02")
     second = sdk.files.get(file_1.id)
     return
 
@@ -169,7 +173,7 @@ def _(sdk):
                 print(
                     f"Citation: {_.sources}"
                 )  # Чтобы получить результат, нужно дождаться окончания запуска  # Выводим на экран ответ  #print(f"Результат 2: {result.message.thread_id}")
-    return assistant_1, thread_1
+    return (assistant_1,)
 
 
 @app.cell
@@ -179,8 +183,18 @@ def _(assistant_1):
 
 
 @app.cell
-def _(thread_1):
-    thread_1
+def _():
+    import pandas as pd
+
+    # Create a sample DataFrame
+    df = pd.DataFrame({
+        "name": ["Alice", "Bob", "Charlie"],
+        "age": [25, 30, 35],
+        "city": ["New York", "London", "Paris"]
+    })
+
+    # Display the DataFrame
+    df
     return
 
 

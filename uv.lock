@@ -1719,6 +1719,7 @@ dependencies = [
     { name = "requests" },
     { name = "ruff" },
     { name = "structlog" },
+    { name = "yandex-ai-studio-sdk" },
     { name = "yandex-cloud-ml-sdk" },
 ]
 
@@ -1736,6 +1737,7 @@ requires-dist = [
     { name = "requests", specifier = ">=2.32.5" },
     { name = "ruff", specifier = ">=0.15.2" },
     { name = "structlog", specifier = ">=25.4.0" },
+    { name = "yandex-ai-studio-sdk", specifier = ">=0.19.2" },
     { name = "yandex-cloud-ml-sdk", specifier = ">=0.19.1" },
 ]
 
