@@ -38,50 +38,118 @@ def _(mo):
 
 
 @app.cell
-def _(file_upload):
-    file_count = len(file_upload.value) if file_upload.value else 0
-    file_count
-    return (file_count,)
+def _(file_upload, mo):
+    raw = file_upload.value
+    if not raw:
+        file_list = []
+        file_names = []
+        file_count = 0
+    elif hasattr(raw, 'contents') and hasattr(raw, 'name'):
+        names = []
+        for i in range(100):
+            n = raw.name(i)
+            if n and n.strip():
+                names.append(n)
+            else:
+                break
+        file_list = raw
+        file_names = names
+        file_count = len(names)
+    else:
+        file_list = list(raw) if hasattr(raw, '__iter__') else [raw]
+        file_count = len(file_list)
+        file_names = [getattr(f, 'name', str(f)) for f in file_list]
+    add_button = mo.ui.run_button(label="Add Files to List")
+    current_files, current_names, current_count = file_list, file_names, file_count
+    add_button, current_files, current_names, current_count
+    return add_button, current_count, current_files, current_names
 
 
 @app.cell
-def _(file_count, mo):
-    if file_count > 0:
-        mo.md(f"**{file_count}** file{'s' if file_count != 1 else ''} uploaded")
-    else:
-        mo.md("No files uploaded yet")
+def _():
+    uploaded_files = []
+    uploaded_names = []
+    return uploaded_files, uploaded_names
+
+
+@app.cell
+def _(
+    add_button,
+    current_count,
+    current_files,
+    current_names,
+    mo,
+    uploaded_files,
+    uploaded_names,
+):
+    if add_button.value and current_count > 0:
+        for f, name in zip(current_files, current_names):
+            if name not in uploaded_names:
+                uploaded_files.append(f)
+                uploaded_names.append(name)
+
+    display = mo.md(f"**{len(uploaded_files)}** file{'s' if len(uploaded_files) != 1 else ''} in list:\n\n" + "\n".join(f"- {n}" for n in uploaded_names))
+    display
     return
 
 
 @app.cell
-def _(Path, file_upload, read_document, tempfile):
+def _(
+    Path,
+    current_files,
+    current_names,
+    read_document,
+    tempfile,
+    uploaded_files,
+    uploaded_names,
+):
+    import base64
     def extract_text_from_files(files):
         """Extract text from uploaded files."""
-        if not files:
+        if not files or len(files) == 0:
             return ""
 
         extracted = []
-        for file_data in files:
-            filename = file_data.name
-            content = file_data.contents
+        try:
+            file_count = len(files)
+        except TypeError:
+            file_count = 1
 
-            suffix = Path(filename).suffix.lower()
+        has_api = hasattr(files, 'name') and callable(getattr(files, 'name', None))
+
+        for i in range(file_count):
             try:
+                if has_api:
+                    fname = files.name(i)
+                    fcontent_raw = files.contents(i)
+                elif isinstance(files[i], (list, tuple)):
+                    fname = files[i][0]
+                    fcontent_raw = files[i][1]
+                elif hasattr(files[i], 'contents'):
+                    fname = getattr(files[i], 'name', f'file_{i}')
+                    fcontent_raw = files[i].contents
+                else:
+                    print(f"Unknown file format: {type(files[i])}")
+                    continue
+
+                fcontent = base64.b64decode(fcontent_raw) if isinstance(fcontent_raw, str) else fcontent_raw
+
+                suffix = Path(fname).suffix.lower()
                 with tempfile.NamedTemporaryFile(
                     suffix=suffix, delete=False
                 ) as tmp:
-                    tmp.write(content)
+                    tmp.write(fcontent)
                     tmp_path = Path(tmp.name)
 
                 if suffix == ".txt":
-                    text = content.decode("utf-8", errors="replace")
+                    text = fcontent.decode("utf-8", errors="replace")
                 else:
                     text = read_document(tmp_path) or ""
 
                 if text:
-                    extracted.append(f"## {filename}\n\n{text}")
+                    extracted.append(f"## {fname}\n\n{text}")
             except Exception as e:
-                print(f"Error processing {filename}: {e}")
+                print(f"Error processing file at index {i}: {e}")
             finally:
                 try:
                     tmp_path.unlink(missing_ok=True)
@@ -90,8 +158,12 @@ def _(Path, file_upload, read_document, tempfile):
 
         return "\n\n---\n\n".join(extracted)
 
-    document_text = extract_text_from_files(file_upload.value) if file_upload.value else ""
-    document_text[:500] + ("..." if len(document_text) > 500 else "")
+    combined_files = uploaded_files + current_files
+    combined_names = list(set(uploaded_names + current_names))
+    document_text = extract_text_from_files(combined_files) if combined_files else ""
+    text_preview = document_text[:500] + ("..." if len(document_text) > 500 else "")
+    text_len = len(document_text)
+    text_preview, text_len
     return (document_text,)
 
 
@@ -137,7 +209,7 @@ def _(LLMManager, ask_button, concurrent, document_text, mo, question):
                 "Use the following document content to answer questions accurately.\n"
                 "If the answer is not in the documents, say so clearly.\n\n"
                 "---\n"
-                f"{document_text[:8000]}\n"
+                f"{document_text}\n"
                 "---\n"
             )
 
@@ -147,6 +219,7 @@ def _(LLMManager, ask_button, concurrent, document_text, mo, question):
                     user_message,
                     system_prompt=system_prompt,
                     response_model=None,
+                    use_cache=False,
                 )
 
             try:
